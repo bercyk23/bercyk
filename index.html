@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treningowo // Dashboard</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc; 
+            color: #1e293b; 
+            padding: 20px;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container { 
+            max-width: 480px; 
+            margin: 40px auto; 
+            background: #ffffff; 
+            padding: 32px; 
+            border-radius: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e2e8f0;
+        }
+        h1 { 
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-top: 0;
+            margin-bottom: 6px;
+            color: #0f172a;
+        }
+        .calendar-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin: 24px 0 16px 0; 
+        }
+        .calendar-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+            color: #334155;
+            text-transform: capitalize;
+        }
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .day { 
+            padding: 10px 2px; 
+            border-radius: 12px;
+            border: 1px solid #f1f5f9; 
+            text-align: center; 
+            cursor: pointer; 
+            background: #f8fafc; 
+            position: relative; 
+            min-height: 52px; 
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .day:hover { 
+            background: #edf2f7; 
+            color: #0f172a;
+            transform: scale(1.02);
+        }
+        .badge { 
+            display: block; 
+            font-size: 9px; 
+            margin-top: 4px; 
+            padding: 2px 4px; 
+            font-weight: 600; 
+            border-radius: 6px;
+        }
+        .badge-michal { color: #15803d; background: #dcfce7; }
+        .badge-klaudia { color: #6b21a8; background: #f3e8ff; }
+        #training-form { 
+            display: none; 
+            margin-top: 24px; 
+            padding: 20px; 
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        input, select { 
+            width: 100%; 
+            margin: 8px 0 16px 0; 
+            padding: 10px 12px; 
+            box-sizing: border-box; 
+            background: #f8fafc; 
+            color: #0f172a; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 10px;
+            font-family: inherit; 
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: #3b82f6;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        button { 
+            background: #0f172a; 
+            color: #ffffff; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 12px;
+            cursor: pointer; 
+            font-family: inherit; 
+            font-weight: 600; 
+            font-size: 14px;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        button:hover { 
+            background: #1e293b; 
+            transform: translateY(-1px);
+        }
+        .treadmill { 
+            margin-top: 28px; 
+            padding: 20px; 
+            background: #fff1f2;
+            border-radius: 16px;
+            border: 1px solid #ffe4e6; 
+            text-align: center; 
+        }
+        .treadmill h3 { font-size: 14px; color: #9f1239; margin: 0 0 12px 0; font-weight: 600; }
+        .treadmill span { color: #e11d48; font-weight: 700; }
+        .treadmill button { background: #ffffff; color: #e11d48; border: 1px solid #fecdd3; }
+        .treadmill button:hover { background: #e11d48; color: #ffffff; border-color: #e11d48; }
+        .nav-btn {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            padding: 6px 12px;
+            width: auto;
+            border-radius: 8px;
+        }
+        .nav-btn:hover { background: #f8fafc; color: #0f172a; }
+        #status { color: #d97706; margin-bottom: 20px; font-size: 13px; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Podsumowanie aktywności</h1>
+    <div id="status">Inicjalizacja usług chmurowych...</div>
+    <div id="auth-section" style="display:none; text-align:center;">
+        <button id="login-btn">Zaloguj się przez Google</button>
+    </div>
+    
+    <div id="app-content" style="display:none;">
+        <div style="font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 4px;" id="user-welcome"></div>
+        <div class="calendar-header">
+            <button class="nav-btn" onclick="changeMonth(-1)">◀</button>
+            <h3 id="month-title"></h3>
+            <button class="nav-btn" onclick="changeMonth(1)">▶</button>
+        </div>
+        
+        <div id="calendar-grid" class="grid"></div>
+
+        <div class="treadmill">
+            <h3>Stan bieżni: Serwis wymagany za <span><span id="hours-left">30h 00m</span></span></h3>
+            <button onclick="resetTreadmill()">Potwierdź smarowanie (Reset)</button>
+        </div>
+
+        <div id="training-form">
+            <h3 id="form-title" style="font-size: 16px; color: #0f172a; margin-bottom: 12px;">Dodaj nową aktywność</h3>
+            <div id="form-inputs">
+                <select id="t-type" onchange="toggleFields()">
+                    <option value="Kardio">Kardio</option>
+                    <option value="Siła">Trening siłowy</option>
+                </select>
+                <div id="cardio-fields">
+                    <select id="c-sub"><option value="Marsz">Marsz</option><option value="Bieg">Bieg</option><option value="Rower">Rower</option></select>
+                    <select id="c-place"><option value="Stacjonarny">Stacjonarny (Bieżnia)</option><option value="W terenie">W terenie</option></select>
+                    <input type="number" step="0.1" id="c-dist" placeholder="Dystans (km)">
+                    <input type="number" step="1" id="c-time" placeholder="Czas trwania (minuty)">
+                </div>
+                <button id="save-btn" onclick="saveTraining()">Zatwierdź i zapisz</button>
+            </div>
+            <button style="background:none; color:#94a3b8; margin-top: 8px; padding: 6px; font-weight: 500;" onclick="document.getElementById('training-form').style.display='none'">Anuluj</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
+
+<script>
+    const CLIENT_ID = '289938219200-sruc345qf7pqk4k7t8h011iua0cjncmq.apps.googleusercontent.com';
+    
+    // Wklejone identyfikatory Twoich nowych plików .json z Dysku Google
+    const dbFileId = '1mack9QLkzU8l0RKR4COtWfHN9ntA782O';
+    const treadmillFileId = '1jRvd-wddUaouwq1jV2NgZ-CAdr7gmjP2';
+    
+    let tokenClient;
+    let currentDate = new Date();
+    let userEmail = "";
+    let userName = "";
+    
+    let treningiBaza = [];
+    let treadmillHours = 30;
+    let wybranegoDniaDataString = "";
+
+    window.onload = function () {
+        gapi.load('client', async () => {
+            try {
+                document.getElementById('status').innerText = "Oczekiwanie na autoryzację profilu...";
+                document.getElementById('auth-section').style.display = 'block';
+                await gapi.client.init({});
+            } catch (e) {
+                document.getElementById('status').innerText = "Błąd inicjalizacji gapi: " + (e.message || JSON.stringify(e));
+            }
+        });
+
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: 'https://www.googleapis.com/auth/drive openid email profile',
+            callback: async (resp) => {
+                if (resp.error) {
+                    document.getElementById('status').innerText = "Błąd OAuth: " + resp.error;
+                    return;
+                }
+                try {
+                    document.getElementById('auth-section').style.display = 'none';
+                    document.getElementById('status').innerText = "Wczytywanie bazy danych z chmury...";
+                    document.getElementById('status').style.display = 'block';
+                    await gapi.client.load('drive', 'v3');
+                    await fetchUserInfo();
+                    await loadDatabaseData();
+                    document.getElementById('app-content').style.display = 'block';
+                    document.getElementById('status').style.display = 'none';
+                    renderCalendar();
+                } catch (e) {
+                    document.getElementById('status').innerText = "Wystąpił błąd chmury: " + (e.message || JSON.stringify(e));
+                    console.error(e);
+                }
+            },
+        });
+        document.getElementById('login-btn').onclick = () => tokenClient.requestAccessToken({prompt: 'consent'});
+    };
+
+    async function fetchUserInfo() {
+        const resp = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { 'Authorization': `Bearer ${gapi.client.getToken().access_token}` }
+        });
+        const info = await resp.json();
+        if (!info.email) throw new Error("Nie udało się pobrać adresu e-mail.");
+        
+        userEmail = info.email.toLowerCase().trim();
+        userName = userEmail === 'bercyk23@gmail.com' ? 'Michał' : (userEmail === 'klaudia.gurska@gmail.com' ? 'Klaudia' : 'Gość');
+        document.getElementById('user-welcome').innerText = `Zalogowany profil: ${userName}`;
+    }
+
+    function formatTreadmillTime(hoursDecimal) {
+        if (hoursDecimal <= 0) return "0h 00m";
+        const totalMinutes = Math.round(hoursDecimal * 60);
+        const h = Math.floor(totalMinutes / 60);
+        const m = totalMinutes % 60;
+        return `${h}h ${String(m).padStart(2, '0')}m`;
+    }
+
+    async function loadDatabaseData() {
+        try {
+            const resDb = await gapi.client.drive.files.get({ fileId: dbFileId, alt: 'media' });
+            treningiBaza = typeof resDb.body === 'string' ? JSON.parse(resDb.body) : resDb.result;
+        } catch(e) {
+            treningiBaza = [];
+        }
+
+        try {
+            const resTm = await gapi.client.drive.files.get({ fileId: treadmillFileId, alt: 'media' });
+            const tmData = typeof resTm.body === 'string' ? JSON.parse(resTm.body) : resTm.result;
+            treadmillHours = tmData.hours ?? 30;
+        } catch(e) {
+            treadmillHours = 30;
+        }
+
+        if (!Array.isArray(treningiBaza)) treningiBaza = [];
+        document.getElementById('hours-left').innerText = formatTreadmillTime(treadmillHours);
+    }
+
+    async function updateDriveFile(fileId, content) {
+        try {
+            await gapi.client.drive.files.update({ fileId: fileId, media: { mimeType: 'application/json', body: JSON.stringify(content) } });
+        } catch(e) {
+            alert("Błąd zapisu pliku: " + JSON.stringify(e));
+        }
+    }
+
+    function renderCalendar() {
+        const grid = document.getElementById('calendar-grid');
+        grid.innerHTML = "";
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        
+        document.getElementById('month-title').innerText = currentDate.toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' });
+        
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const blankDays = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+
+        for (let i = 0; i < blankDays; i++) grid.appendChild(document.createElement('div'));
+
+        for(let i=1; i<=daysInMonth; i++) {
+            let div = document.createElement('div');
+            div.className = 'day'; 
+            div.innerHTML = `<span style="font-weight:600; color:#1e293b;">${i}</span>`;
+            
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            const dnioweTreningi = Array.isArray(treningiBaza) ? treningiBaza.filter(t => t.date === dateStr) : [];
+            
+            dnioweTreningi.forEach(t => {
+                let badge = document.createElement('span');
+                badge.className = `badge ${t.user === 'Michał' ? 'badge-michal' : 'badge-klaudia'}`;
+                badge.innerText = `${t.user[0]}: ${t.type === 'Kardio' ? t.subType : 'Siła'}`;
+                div.appendChild(badge);
+            });
+
+            div.onclick = () => openDay(dateStr, dnioweTreningi);
+            grid.appendChild(div);
+        }
+    }
+
+    function openDay(dateStr, treningi) {
+        wybranegoDniaDataString = dateStr;
+        document.getElementById('form-title').innerText = `Dzień: ${dateStr}`;
+        document.getElementById('training-form').style.display = 'block';
+        
+        const tMoje = treningi.find(t => t.user === userName);
+        const tInne = treningi.find(t => t.user !== userName);
+        
+        let htmlExtra = "";
+        if (tInne) {
+            htmlExtra += `<div style="background:#f8fafc; padding:12px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:14px; font-size:13px; color:#334155;">
+                <strong style="color:#6b21a8;">Trening (${tInne.user}):</strong><br>
+                Typ: ${tInne.type} ${tInne.subType ? '('+tInne.subType+', '+tInne.place+')' : ''}<br>
+                ${tInne.type === 'Kardio' ? `Dystans: ${tInne.distance}km | Czas: ${tInne.time} min` : ''}
+            </div>`;
+        }
+
+        document.getElementById('form-inputs').innerHTML = htmlExtra + `
+            <select id="t-type" onchange="toggleFields()">
+                <option value="Kardio">Kardio</option>
+                <option value="Siła">Trening siłowy</option>
+            </select>
+            <div id="cardio-fields">
+                <select id="c-sub"><option value="Marsz">Marsz</option><option value="Bieg">Bieg</option><option value="Rower">Rower</option></select>
+                <select id="c-place"><option value="Stacjonarny">Stacjonarny (Bieżnia)</option><option value="W terenie">W terenie</option></select>
+                <input type="number" step="0.1" id="c-dist" placeholder="Dystans (km)">
+                <input type="number" step="1" id="c-time" placeholder="Czas trwania (minuty)">
+            </div>
+            <button id="save-btn" onclick="saveTraining()">${tMoje ? 'Zaktualizuj swój trening' : 'Zapisz aktywność'}</button>
+        `;
+
+        if (tMoje) {
+            document.getElementById('t-type').value = tMoje.type;
+            if (tMoje.type === 'Kardio') {
+                document.getElementById('c-sub').value = tMoje.subType || 'Marsz';
+                document.getElementById('c-place').value = tMoje.place || 'W terenie';
+                document.getElementById('c-dist').value = tMoje.distance || '';
+                document.getElementById('c-time').value = tMoje.time || '';
+            }
+        }
+        toggleFields();
+    }
+
+    async function saveTraining() {
+        const type = document.getElementById('t-type').value;
+        if(!Array.isArray(treningiBaza)) treningiBaza = [];
+
+        const staryTreningIndex = treningiBaza.findIndex(t => t.date === wybranegoDniaDataString && t.user === userName);
+        if (staryTreningIndex !== -1) {
+            const stary = treningiBaza[staryTreningIndex];
+            if (stary.type === 'Kardio' && stary.place === 'Stacjonarny' && (stary.subType === 'Bieg' || stary.subType === 'Marsz')) {
+                treadmillHours = treadmillHours + (parseFloat(stary.time) / 60);
+            }
+            treningiBaza.splice(staryTreningIndex, 1);
+        }
+
+        let nowyTrening = { date: wybranegoDniaDataString, user: userName, type: type };
+
+        if (type === 'Kardio') {
+            const sub = document.getElementById('c-sub').value;
+            const place = document.getElementById('c-place').value;
+            const dist = parseFloat(document.getElementById('c-dist').value) || 0;
+            const timeInMinutes = parseFloat(document.getElementById('c-time').value) || 0;
+            const timeInHours = timeInMinutes / 60;
+            
+            nowyTrening.subType = sub;
+            nowyTrening.place = place;
+            nowyTrening.distance = dist;
+            nowyTrening.time = timeInMinutes;
+            nowyTrening.speed = timeInHours > 0 ? (dist / timeInHours).toFixed(1) : 0;
+
+            if (place === 'Stacjonarny' && (sub === 'Bieg' || sub === 'Marsz')) {
+                treadmillHours = Math.max(0, treadmillHours - timeInHours);
+            }
+        }
+
+        treningiBaza.push(nowyTrening);
+        document.getElementById('status').innerText = "Zapisywanie w chmurze...";
+        document.getElementById('status').style.display = 'block';
+        
+        await updateDriveFile(dbFileId, treningiBaza);
+        await updateDriveFile(treadmillFileId, { hours: treadmillHours });
+        
+        document.getElementById('hours-left').innerText = formatTreadmillTime(treadmillHours);
+        document.getElementById('status').style.display = 'none';
+        document.getElementById('training-form').style.display = 'none';
+        renderCalendar();
+    }
+
+    async function resetTreadmill() {
+        treadmillHours = 30;
+        document.getElementById('hours-left').innerText = "30h 00m";
+        await updateDriveFile(treadmillFileId, { hours: 30 });
+        alert("Zresetowano licznik bieżni.");
+    }
+
+    function changeMonth(direction) {
+        currentDate.setMonth(currentDate.getMonth() + direction);
+        renderCalendar();
+    }
+
+    function toggleFields() {
+        document.getElementById('cardio-fields').style.display = 
+            document.getElementById('t-type').value === 'Kardio' ? 'block' : 'none';
+    }
+</script>
+</body>
+</html>
