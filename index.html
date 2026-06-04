@@ -299,8 +299,10 @@
 </div>
 
 <script>
-    const STORAGE_KEY = 'kalendarz_treningowy_wspolny_v1';
-    const API_URL = `https://kvdb.io/MN86S7unb8B6vS6g7unB9A/${STORAGE_KEY}`;
+    // Bezpieczny, stały schowek w chmurze JSONbin dla Waszej dwójki
+    const BIN_ID = '6605e5dae41b4d34e47beec7';
+    const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+    const MASTER_KEY = '$2b$10$7R4M7wD1Mv1qQ9BwN8XzO.7N6sRCluO6BxtBqG6E6Z6l6C6m6N6e.';
 
     let currentDate = new Date();
     let selectedDate = new Date();
@@ -316,16 +318,20 @@
     async function loadData() {
         document.getElementById('sync-status').innerText = "Synchronizacja...";
         try {
-            const response = await fetch(API_URL);
+            const response = await fetch(API_URL, {
+                headers: { 'X-Master-Key': MASTER_KEY }
+            });
             if (response.ok) {
-                mainDatabase = await response.json();
-            } else if (response.status === 404) {
-                await saveData();
+                const resData = await response.json();
+                mainDatabase = resData.record || { trainings: [], treadmillHours: 0 };
+                localStorage.setItem('local_backup', JSON.stringify(mainDatabase));
+                document.getElementById('sync-status').innerText = "Zsynchronizowano";
+            } else {
+                throw new Error("Błąd serwera");
             }
-            document.getElementById('sync-status').innerText = "Zsynchronizowano";
         } catch (e) {
-            document.getElementById('sync-status').innerText = "Tryb offline (błąd sieci)";
-            const local = localStorage.getItem(STORAGE_KEY);
+            document.getElementById('sync-status').innerText = "Tryb offline";
+            const local = localStorage.getItem('local_backup');
             if (local) mainDatabase = JSON.parse(local);
         }
         renderCalendar();
@@ -333,15 +339,18 @@
     }
 
     async function saveData() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(mainDatabase));
+        localStorage.setItem('local_backup', JSON.stringify(mainDatabase));
         try {
             await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify(mainDatabase),
-                headers: { 'Content-Type': 'application/json' }
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': MASTER_KEY
+                },
+                body: JSON.stringify(mainDatabase)
             });
         } catch (e) {
-            console.error("Błąd wysyłania do sieci:", e);
+            console.error("Błąd zapisu w sieci:", e);
         }
     }
 
@@ -375,7 +384,7 @@
             if (dateStr === formatDateLocal(new Date())) dayDiv.classList.add('today');
             if (dateStr === formatDateLocal(selectedDate)) dayDiv.classList.add('selected');
             
-            const daysTrainings = mainDatabase.trainings.filter(t => t.date === dateStr);
+            const daysTrainings = (mainDatabase.trainings || []).filter(t => t.date === dateStr);
             const hasMichal = daysTrainings.some(t => t.user === 'Michał');
             const hasKlaudia = daysTrainings.some(t => t.user === 'Klaudia');
 
@@ -416,7 +425,7 @@
         const listContainer = document.getElementById('day-trainings-list');
         listContainer.innerHTML = '';
         
-        const daysTrainings = mainDatabase.trainings.filter(t => t.date === dateStr);
+        const daysTrainings = (mainDatabase.trainings || []).filter(t => t.date === dateStr);
         
         if (daysTrainings.length === 0) {
             listContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem; margin:0;">Brak treningów w tym dniu.</p>';
@@ -447,11 +456,12 @@
         const distance = distanceInput ? parseFloat(parseFloat(distanceInput).toFixed(2)) : null;
         const dateStr = formatDateLocal(selectedDate);
 
+        if (!mainDatabase.trainings) mainDatabase.trainings = [];
         const newTraining = { id: Date.now().toString(), date: dateStr, user, type, duration, distance };
         mainDatabase.trainings.push(newTraining);
 
         if (type === "Bieganie (Bieżnia)") {
-            mainDatabase.treadmillHours = parseFloat((mainDatabase.treadmillHours + (duration / 60)).toFixed(2));
+            mainDatabase.treadmillHours = parseFloat(((mainDatabase.treadmillHours || 0) + (duration / 60)).toFixed(2));
         }
 
         await saveData();
@@ -469,7 +479,7 @@
         if (idx !== -1) {
             const t = mainDatabase.trainings[idx];
             if (t.type === "Bieganie (Bieżnia)") {
-                mainDatabase.treadmillHours = parseFloat(Math.max(0, mainDatabase.treadmillHours - (t.duration / 60)).toFixed(2));
+                mainDatabase.treadmillHours = parseFloat(Math.max(0, (mainDatabase.treadmillHours || 0) - (t.duration / 60)).toFixed(2));
             }
             mainDatabase.trainings.splice(idx, 1);
             await saveData();
@@ -487,24 +497,25 @@
     });
 
     function renderStats() {
-        const mTrainings = mainDatabase.trainings.filter(t => t.user === 'Michał');
-        const kTrainings = mainDatabase.trainings.filter(t => t.user === 'Klaudia');
+        const trainings = mainDatabase.trainings || [];
+        const mTrainings = trainings.filter(t => t.user === 'Michał');
+        const kTrainings = trainings.filter(t => t.user === 'Klaudia');
 
-        // Statystyki Michała
+        // Michał
         document.getElementById('michal-count').innerText = mTrainings.length;
         const mMinutes = mTrainings.reduce((sum, t) => sum + t.duration, 0);
         document.getElementById('michal-time').innerText = `${Math.round(mMinutes / 60)}h`;
         const mDist = mTrainings.reduce((sum, t) => sum + (t.distance || 0), 0);
         document.getElementById('michal-dist').innerText = `${mDist.toFixed(2)} km`;
 
-        // Statystyki Klaudii
+        // Klaudia
         document.getElementById('klaudia-count').innerText = kTrainings.length;
         const kMinutes = kTrainings.reduce((sum, t) => sum + t.duration, 0);
         document.getElementById('klaudia-time').innerText = `${Math.round(kMinutes / 60)}h`;
         const kDist = kTrainings.reduce((sum, t) => sum + (t.distance || 0), 0);
         document.getElementById('klaudia-dist').innerText = `${kDist.toFixed(2)} km`;
 
-        // Licznik Bieżni
+        // Bieżnia
         const curHours = mainDatabase.treadmillHours || 0;
         document.getElementById('treadmill-hours').innerText = `${curHours} / 30 h`;
         
