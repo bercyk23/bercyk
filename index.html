@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalendarz Treningowy</title>
+    <title>Wspólny Kalendarz Treningowy</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -12,6 +12,8 @@
             --text-color: #e0e0e0;
             --text-muted: #a0a0a0;
             --border-color: #333333;
+            --michal-color: #03dac6;
+            --klaudia-color: #ff79c6;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -36,7 +38,7 @@
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
         }
-        h1, h2, h3 {
+        h1, h2, h3, h4 {
             margin: 0;
             color: var(--accent-color);
         }
@@ -55,10 +57,6 @@
         }
         .btn-danger {
             background-color: #cf6679;
-        }
-        #auth-status {
-            font-size: 0.9rem;
-            color: var(--text-muted);
         }
         .dashboard {
             display: grid;
@@ -118,20 +116,34 @@
         .day.selected {
             background-color: rgba(187, 134, 252, 0.2);
         }
-        .day.has-training {
-            background-color: rgba(3, 218, 198, 0.15);
-            border-color: #03dac6;
+        .day.has-michal {
+            border-color: var(--michal-color);
+            background-color: rgba(3, 218, 198, 0.05);
+        }
+        .day.has-klaudia {
+            border-color: var(--klaudia-color);
+            background-color: rgba(255, 121, 198, 0.05);
+        }
+        .day.has-both {
+            border-color: var(--accent-color);
+            background-color: rgba(187, 134, 252, 0.1);
         }
         .day-number {
             align-self: flex-start;
         }
-        .day-indicator {
-            width: 8px;
-            height: 8px;
-            background-color: #03dac6;
-            border-radius: 50%;
+        .indicators-container {
+            display: flex;
+            gap: 3px;
             align-self: flex-end;
         }
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .ind-michal { background-color: var(--michal-color); }
+        .ind-klaudia { background-color: var(--klaudia-color); }
+        
         .form-group {
             margin-bottom: 15px;
         }
@@ -141,7 +153,7 @@
             color: var(--text-muted);
             font-size: 0.9rem;
         }
-        input, select, textarea {
+        input, select {
             width: 100%;
             padding: 8px;
             background-color: rgba(0,0,0,0.2);
@@ -150,10 +162,6 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
-        textarea {
-            resize: vertical;
-            height: 80px;
-        }
         .training-list {
             margin-top: 15px;
             max-height: 200px;
@@ -161,7 +169,6 @@
         }
         .training-item {
             background-color: rgba(255,255,255,0.05);
-            border-left: 3px solid #03dac6;
             padding: 10px;
             margin-bottom: 8px;
             border-radius: 0 4px 4px 0;
@@ -169,46 +176,34 @@
             justify-content: space-between;
             align-items: center;
         }
-        .training-info h4 {
-            margin: 0 0 5px 0;
-            color: #03dac6;
-        }
-        .training-info p {
-            margin: 0;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
+        .item-michal { border-left: 4px solid var(--michal-color); }
+        .item-klaudia { border-left: 4px solid var(--klaudia-color); }
+        
+        .training-info h4 { margin: 0 0 3px 0; }
+        .training-info p { margin: 0; font-size: 0.85rem; color: var(--text-muted); }
+        
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 10px;
+            margin-bottom: 15px;
         }
         .stat-box {
             background-color: rgba(255,255,255,0.02);
             border: 1px solid var(--border-color);
-            padding: 10px;
+            padding: 8px;
             border-radius: 4px;
             text-align: center;
+            font-size: 0.85rem;
         }
         .stat-value {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
-            color: var(--accent-color);
-            margin-top: 5px;
+            margin-top: 3px;
         }
-        .hidden {
-            display: none !important;
-        }
-        #login-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 60vh;
-        }
-        #login-screen p {
-            margin-bottom: 20px;
+        #sync-status {
+            font-size: 0.8rem;
             color: var(--text-muted);
         }
     </style>
@@ -218,21 +213,13 @@
 <div class="container">
     <header>
         <div>
-            <h1>Kalendarz Treningowy</h1>
-            <span id="auth-status">Inicjalizacja...</span>
+            <h1>Wspólny Kalendarz</h1>
+            <span id="sync-status">Pobieranie danych...</span>
         </div>
-        <div>
-            <button id="btn-login" class="hidden">Zaloguj przez Google</button>
-            <button id="btn-logout" class="hidden btn-danger">Wyloguj</button>
-        </div>
+        <button id="btn-refresh" style="padding: 5px 10px; font-size: 0.8rem;">Odśwież</button>
     </header>
 
-    <div id="login-screen">
-        <p>Zaloguj się swoim kontem Google, aby zarządzać treningami zapisanymi na Twoim Dysku Google.</p>
-        <button id="btn-login-central">Zaloguj się</button>
-    </div>
-
-    <div id="main-content" class="hidden dashboard">
+    <div class="dashboard">
         <div class="card">
             <div class="calendar-controls">
                 <button id="btn-prev">&lt;</button>
@@ -242,9 +229,9 @@
             <div class="calendar-grid" id="calendar-grid"></div>
         </div>
 
-        <div class="flex-column" style="display: flex; flex-direction: column; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
             <div class="card">
-                <h3 id="editor-title">Treningi w dniu: </h3>
+                <h3>Treningi w dniu:</h3>
                 <p id="selected-date-str" style="color: var(--text-muted); margin: 5px 0 15px 0; font-size: 0.9rem;"></p>
                 
                 <div class="training-list" id="day-trainings-list"></div>
@@ -253,6 +240,13 @@
                 
                 <h4>Dodaj nowy trening</h4>
                 <form id="training-form" style="margin-top: 10px;">
+                    <div class="form-group">
+                        <label for="input-user">Kto trenował?</label>
+                        <select id="input-user" required>
+                            <option value="Michał">Michał ♂</option>
+                            <option value="Klaudia">Klaudia ♀</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label for="input-type">Rodzaj aktywności</label>
                         <select id="input-type" required>
@@ -268,32 +262,34 @@
                         <input type="number" id="input-duration" min="1" required>
                     </div>
                     <div class="form-group">
-                        <label for="input-notes">Notatki / Opis</label>
-                        <textarea id="input-notes" placeholder="np. dystans, samopoczucie..."></textarea>
+                        <label for="input-distance">Dystans (km)</label>
+                        <input type="number" id="input-distance" min="0" step="0.01" placeholder="opcjonalnie">
                     </div>
-                    <button type="submit" style="width: 100%;">Zatwierdź i zapisz</button>
+                    <button type="submit" style="width: 100%;">Zapisz</button>
                 </form>
             </div>
 
             <div class="card">
-                <h3>Statystyki ogólne</h3>
+                <h3 style="color: var(--michal-color);">Statystyki - Michał</h3>
                 <div class="stats-grid">
-                    <div class="stat-box">
-                        <div>Wszystkie treningi</div>
-                        <div class="stat-value" id="stat-total-count">0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div>Czas łącznie</div>
-                        <div class="stat-value" id="stat-total-time">0h</div>
-                    </div>
+                    <div class="stat-box"><div>Treningi</div><div class="stat-value" id="michal-count" style="color: var(--michal-color);">0</div></div>
+                    <div class="stat-box"><div>Czas</div><div class="stat-value" id="michal-time" style="color: var(--michal-color);">0h</div></div>
+                    <div class="stat-box" style="grid-column: span 2;"><div>Dystans łączny</div><div class="stat-value" id="michal-dist" style="color: var(--michal-color);">0 km</div></div>
                 </div>
 
-                <h3 style="margin-top: 20px;">Stan Oleju w Bieżni</h3>
+                <h3 style="color: var(--klaudia-color);">Statystyki - Klaudia</h3>
+                <div class="stats-grid">
+                    <div class="stat-box"><div>Treningi</div><div class="stat-value" id="klaudia-count" style="color: var(--klaudia-color);">0</div></div>
+                    <div class="stat-box"><div>Czas</div><div class="stat-value" id="klaudia-time" style="color: var(--klaudia-color);">0h</div></div>
+                    <div class="stat-box" style="grid-column: span 2;"><div>Dystans łączny</div><div class="stat-value" id="klaudia-dist" style="color: var(--klaudia-color);">0 km</div></div>
+                </div>
+
+                <h3 style="margin-top: 15px;">Stan Oleju w Bieżni 🏃‍♂️</h3>
                 <div class="stats-grid">
                     <div class="stat-box" style="grid-column: span 2;">
                         <div>Czas pracy od smarowania</div>
                         <div class="stat-value" id="treadmill-hours">0 / 30 h</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;" id="treadmill-status">Sprawdzanie...</div>
+                        <div style="font-size: 0.8rem; margin-top: 5px;" id="treadmill-status">Sprawdzanie...</div>
                         <button id="btn-reset-treadmill" style="margin-top: 10px; font-size: 0.8rem; padding: 5px 10px;" class="btn-danger">Resetuj licznik oleju</button>
                     </div>
                 </div>
@@ -302,135 +298,56 @@
     </div>
 </div>
 
-<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
-
 <script>
-    const CLIENT_ID = '289938219200-sruc345qf7pqk4k7t8h011iua0cjncmq.apps.googleusercontent.com';
-    const API_KEY = 'AIzaSyA-XeXLNwgulaqjhydaqdcoVUqo0_VJzzM';
-    const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+    const STORAGE_KEY = 'kalendarz_treningowy_wspolny_v1';
+    const API_URL = `https://kvdb.io/MN86S7unb8B6vS6g7unB9A/${STORAGE_KEY}`;
 
-    const dbFileId = '1mack9QLkzU8l0RKR4COtWfHN9ntA782O';
-    const treadmillFileId = '1jRvd-wddUaouwq1jV2NgZ-CAdr7gmjP2';
-
-    let gapiInited = false;
-    let gisInited = false;
-    let tokenClient;
-    
     let currentDate = new Date();
     let selectedDate = new Date();
     
-    let trainingsDatabase = [];
-    let treadmillData = { hours: 0 };
+    let mainDatabase = {
+        trainings: [],
+        treadmillHours: 0
+    };
 
     const weekdays = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'];
     const months = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
 
-    function gapiLoaded() { gapi.load('client', initializeGapiClient); }
-    async function initializeGapiClient() {
-        await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
-        gapiInited = true;
-        maybeEnableButtons();
-    }
-    function gisLoaded() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: CLIENT_ID,
-            scope: SCOPES,
-            callback: '',
-        });
-        gisInited = true;
-        maybeEnableButtons();
-    }
-    function maybeEnableButtons() {
-        if (gapiInited && gisInited) {
-            document.getElementById('btn-login').classList.remove('hidden');
-            document.getElementById('btn-login-central').classList.remove('hidden');
-            checkExistingAuth();
+    async function loadData() {
+        document.getElementById('sync-status').innerText = "Synchronizacja...";
+        try {
+            const response = await fetch(API_URL);
+            if (response.ok) {
+                mainDatabase = await response.json();
+            } else if (response.status === 404) {
+                await saveData();
+            }
+            document.getElementById('sync-status').innerText = "Zsynchronizowano";
+        } catch (e) {
+            document.getElementById('sync-status').innerText = "Tryb offline (błąd sieci)";
+            const local = localStorage.getItem(STORAGE_KEY);
+            if (local) mainDatabase = JSON.parse(local);
         }
-    }
-
-    function checkExistingAuth() {
-        const token = localStorage.getItem('gapi_token');
-        if (token) {
-            gapi.client.setToken({ access_token: token });
-            showAppContent();
-        }
-    }
-
-    function handleAuthClick() {
-        tokenClient.callback = async (resp) => {
-            if (resp.error !== undefined) { throw (resp); }
-            localStorage.setItem('gapi_token', gapi.client.getToken().access_token);
-            showAppContent();
-        };
-        if (gapi.client.getToken() === null) {
-            tokenClient.requestAccessToken({ prompt: 'consent' });
-        } else {
-            tokenClient.requestAccessToken({ prompt: '' });
-        }
-    }
-
-    function handleSignoutClick() {
-        gapi.client.setToken(null);
-        localStorage.removeItem('gapi_token');
-        location.reload();
-    }
-
-    async function showAppContent() {
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('main-content').classList.remove('hidden');
-        document.getElementById('btn-login').classList.add('hidden');
-        document.getElementById('btn-logout').classList.remove('hidden');
-        document.getElementById('auth-status').innerText = "Zalogowano pomyślnie";
-        
-        await loadDataFromDrive();
         renderCalendar();
         renderStats();
     }
 
-    async function updateDriveFile(fileId, content) {
+    async function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(mainDatabase));
         try {
-            const token = gapi.client.getToken().access_token;
-            const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(content)
+            await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify(mainDatabase),
+                headers: { 'Content-Type': 'application/json' }
             });
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(`Status: ${response.status}, ${errText}`);
-            }
-        } catch(e) {
-            alert("Błąd zapisu pliku na Dysku Google: " + e.message);
-        }
-    }
-
-    async function loadDataFromDrive() {
-        try {
-            const dbResp = await gapi.client.drive.files.get({ fileId: dbFileId, alt: 'media' });
-            trainingsDatabase = dbResp.result || [];
         } catch (e) {
-            console.error(e);
-            trainingsDatabase = [];
-        }
-
-        try {
-            const treadResp = await gapi.client.drive.files.get({ fileId: treadmillFileId, alt: 'media' });
-            treadmillData = treadResp.result || { hours: 0 };
-        } catch (e) {
-            console.error(e);
-            treadmillData = { hours: 0 };
+            console.error("Błąd wysyłania do sieci:", e);
         }
     }
 
     function renderCalendar() {
         const grid = document.getElementById('calendar-grid');
         grid.innerHTML = '';
-        
         document.getElementById('calendar-month-year').innerText = `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
         
         weekdays.forEach(day => {
@@ -458,11 +375,23 @@
             if (dateStr === formatDateLocal(new Date())) dayDiv.classList.add('today');
             if (dateStr === formatDateLocal(selectedDate)) dayDiv.classList.add('selected');
             
-            const hasTraining = trainingsDatabase.some(t => t.date === dateStr);
-            if (hasTraining) dayDiv.classList.add('has-training');
+            const daysTrainings = mainDatabase.trainings.filter(t => t.date === dateStr);
+            const hasMichal = daysTrainings.some(t => t.user === 'Michał');
+            const hasKlaudia = daysTrainings.some(t => t.user === 'Klaudia');
+
+            if (hasMichal && hasKlaudia) dayDiv.classList.add('has-both');
+            else if (hasMichal) dayDiv.classList.add('has-michal');
+            else if (hasKlaudia) dayDiv.classList.add('has-klaudia');
 
             dayDiv.innerHTML = `<span class="day-number">${d}</span>`;
-            if (hasTraining) dayDiv.innerHTML += `<span class="day-indicator"></span>`;
+            
+            if (daysTrainings.length > 0) {
+                let indHtml = '<div class="indicators-container">';
+                if (hasMichal) indHtml += '<div class="indicator ind-michal"></div>';
+                if (hasKlaudia) indHtml += '<div class="indicator ind-klaudia"></div>';
+                indHtml += '</div>';
+                dayDiv.innerHTML += indHtml;
+            }
 
             dayDiv.addEventListener('click', () => {
                 selectedDate = thisDate;
@@ -487,19 +416,19 @@
         const listContainer = document.getElementById('day-trainings-list');
         listContainer.innerHTML = '';
         
-        const daysTrainings = trainingsDatabase.filter(t => t.date === dateStr);
+        const daysTrainings = mainDatabase.trainings.filter(t => t.date === dateStr);
         
         if (daysTrainings.length === 0) {
-            listContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem; margin:0;">Brak zaplanowanych lub wykonanych treningów.</p>';
+            listContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem; margin:0;">Brak treningów w tym dniu.</p>';
         } else {
             daysTrainings.forEach(t => {
                 const item = document.createElement('div');
-                item.className = 'training-item';
+                item.className = `training-item ${t.user === 'Michał' ? 'item-michal' : 'item-klaudia'}`;
                 item.innerHTML = `
                     <div class="training-info">
-                        <h4>${t.type}</h4>
+                        <h4 style="color: ${t.user === 'Michał' ? 'var(--michal-color)' : 'var(--klaudia-color)'}">${t.user}: ${t.type}</h4>
                         <p>Czas: <strong>${t.duration} min</strong></p>
-                        ${t.notes ? `<p style="font-style:italic; font-size:0.8rem; margin-top:3px;">${t.notes}</p>` : ''}
+                        ${t.distance ? `<p>Dystans: <strong>${t.distance} km</strong></p>` : ''}
                     </div>
                     <button class="btn-danger" style="padding: 5px 8px; font-size: 0.8rem;" onclick="deleteTraining('${t.id}')">Usuń</button>
                 `;
@@ -511,58 +440,72 @@
     document.getElementById('training-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        const user = document.getElementById('input-user').value;
         const type = document.getElementById('input-type').value;
         const duration = parseInt(document.getElementById('input-duration').value);
-        const notes = document.getElementById('input-notes').value;
+        const distanceInput = document.getElementById('input-distance').value;
+        const distance = distanceInput ? parseFloat(parseFloat(distanceInput).toFixed(2)) : null;
         const dateStr = formatDateLocal(selectedDate);
 
-        const newTraining = { id: Date.now().toString(), date: dateStr, type, duration, notes };
-        trainingsDatabase.push(newTraining);
+        const newTraining = { id: Date.now().toString(), date: dateStr, user, type, duration, distance };
+        mainDatabase.trainings.push(newTraining);
 
         if (type === "Bieganie (Bieżnia)") {
-            treadmillData.hours = parseFloat((treadmillData.hours + (duration / 60)).toFixed(2));
-            await updateDriveFile(treadmillFileId, treadmillData);
+            mainDatabase.treadmillHours = parseFloat((mainDatabase.treadmillHours + (duration / 60)).toFixed(2));
         }
 
-        await updateDriveFile(dbFileId, trainingsDatabase);
+        await saveData();
         
         document.getElementById('input-duration').value = '';
-        document.getElementById('input-notes').value = '';
+        document.getElementById('input-distance').value = '';
         
         renderCalendar();
         renderStats();
     });
 
     async function deleteTraining(id) {
-        if(!confirm("Czy na pewno chcesz usunąć ten trening?")) return;
-        const idx = trainingsDatabase.findIndex(t => t.id === id);
+        if(!confirm("Usunąć ten trening?")) return;
+        const idx = mainDatabase.trainings.findIndex(t => t.id === id);
         if (idx !== -1) {
-            const t = trainingsDatabase[idx];
+            const t = mainDatabase.trainings[idx];
             if (t.type === "Bieganie (Bieżnia)") {
-                treadmillData.hours = parseFloat(Math.max(0, treadmillData.hours - (t.duration / 60)).toFixed(2));
-                await updateDriveFile(treadmillFileId, treadmillData);
+                mainDatabase.treadmillHours = parseFloat(Math.max(0, mainDatabase.treadmillHours - (t.duration / 60)).toFixed(2));
             }
-            trainingsDatabase.splice(idx, 1);
-            await updateDriveFile(dbFileId, trainingsDatabase);
+            mainDatabase.trainings.splice(idx, 1);
+            await saveData();
             renderCalendar();
             renderStats();
         }
     }
 
     document.getElementById('btn-reset-treadmill').addEventListener('click', async () => {
-        if (confirm("Czy na pewno przesmarowałeś pas i chcesz zresetować licznik do 0 godzin?")) {
-            treadmillData.hours = 0;
-            await updateDriveFile(treadmillFileId, treadmillData);
+        if (confirm("Zresetować licznik oleju bieżni do 0h?")) {
+            mainDatabase.treadmillHours = 0;
+            await saveData();
             renderStats();
         }
     });
 
     function renderStats() {
-        document.getElementById('stat-total-count').innerText = trainingsDatabase.length;
-        const totalMinutes = trainingsDatabase.reduce((sum, t) => sum + t.duration, 0);
-        document.getElementById('stat-total-time').innerText = `${Math.round(totalMinutes / 60)}h`;
+        const mTrainings = mainDatabase.trainings.filter(t => t.user === 'Michał');
+        const kTrainings = mainDatabase.trainings.filter(t => t.user === 'Klaudia');
 
-        const curHours = treadmillData.hours || 0;
+        // Statystyki Michała
+        document.getElementById('michal-count').innerText = mTrainings.length;
+        const mMinutes = mTrainings.reduce((sum, t) => sum + t.duration, 0);
+        document.getElementById('michal-time').innerText = `${Math.round(mMinutes / 60)}h`;
+        const mDist = mTrainings.reduce((sum, t) => sum + (t.distance || 0), 0);
+        document.getElementById('michal-dist').innerText = `${mDist.toFixed(2)} km`;
+
+        // Statystyki Klaudii
+        document.getElementById('klaudia-count').innerText = kTrainings.length;
+        const kMinutes = kTrainings.reduce((sum, t) => sum + t.duration, 0);
+        document.getElementById('klaudia-time').innerText = `${Math.round(kMinutes / 60)}h`;
+        const kDist = kTrainings.reduce((sum, t) => sum + (t.distance || 0), 0);
+        document.getElementById('klaudia-dist').innerText = `${kDist.toFixed(2)} km`;
+
+        // Licznik Bieżni
+        const curHours = mainDatabase.treadmillHours || 0;
         document.getElementById('treadmill-hours').innerText = `${curHours} / 30 h`;
         
         const statusEl = document.getElementById('treadmill-status');
@@ -580,10 +523,9 @@
 
     document.getElementById('btn-prev').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
     document.getElementById('btn-next').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
+    document.getElementById('btn-refresh').addEventListener('click', loadData);
 
-    document.getElementById('btn-login').addEventListener('click', handleAuthClick);
-    document.getElementById('btn-login-central').addEventListener('click', handleAuthClick);
-    document.getElementById('btn-logout').addEventListener('click', handleSignoutClick);
+    loadData();
 </script>
 </body>
 </html>
