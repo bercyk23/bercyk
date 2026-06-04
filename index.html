@@ -299,7 +299,8 @@
 </div>
 
 <script>
-    const SUPABASE_URL = 'https://ytkl2rm-1w0muzwcy252za.supabase.co';
+    // Poprawiony adres URL bazy danych z uwzględnieniem wielkości liter
+    const SUPABASE_URL = 'https://ytkl2Rm-1W0mUZwCY252zA.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_ytkl2Rm-1W0mUZwCY252zA_xO3ukIFJ';
     const API_URL = `${SUPABASE_URL}/rest/v1/kalendarz?id=eq.wspolny`;
 
@@ -329,6 +330,8 @@
                     mainDatabase = data[0].dane;
                 }
                 document.getElementById('sync-status').innerText = "Zsynchronizowano";
+            } else {
+                document.getElementById('sync-status').innerText = "Błąd konfiguracji";
             }
         } catch (e) {
             document.getElementById('sync-status').innerText = "Błąd połączenia";
