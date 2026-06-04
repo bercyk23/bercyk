@@ -3,433 +3,587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Treningowo // Dashboard</title>
+    <title>Kalendarz Treningowy</title>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8fafc; 
-            color: #1e293b; 
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-color: #bb86fc;
+            --text-color: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border-color: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
             padding: 20px;
-            margin: 0;
-            -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .container { 
-            max-width: 480px; 
-            margin: 40px auto; 
-            background: #ffffff; 
-            padding: 32px; 
-            border-radius: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
-            border: 1px solid #e2e8f0;
-        }
-        h1 { 
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin-top: 0;
-            margin-bottom: 6px;
-            color: #0f172a;
-        }
-        .calendar-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin: 24px 0 16px 0; 
-        }
-        .calendar-header h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0;
-            color: #334155;
-            text-transform: capitalize;
-        }
-        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-        .day { 
-            padding: 10px 2px; 
-            border-radius: 12px;
-            border: 1px solid #f1f5f9; 
-            text-align: center; 
-            cursor: pointer; 
-            background: #f8fafc; 
-            position: relative; 
-            min-height: 52px; 
-            font-size: 14px;
-            color: #64748b;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        .day:hover { 
-            background: #edf2f7; 
-            color: #0f172a;
-            transform: scale(1.02);
-        }
-        .badge { 
-            display: block; 
-            font-size: 9px; 
-            margin-top: 4px; 
-            padding: 2px 4px; 
-            font-weight: 600; 
-            border-radius: 6px;
-        }
-        .badge-michal { color: #15803d; background: #dcfce7; }
-        .badge-klaudia { color: #6b21a8; background: #f3e8ff; }
-        #training-form { 
-            display: none; 
-            margin-top: 24px; 
-            padding: 20px; 
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            background: #ffffff; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-        }
-        input, select { 
-            width: 100%; 
-            margin: 8px 0 16px 0; 
-            padding: 10px 12px; 
-            box-sizing: border-box; 
-            background: #f8fafc; 
-            color: #0f172a; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 10px;
-            font-family: inherit; 
-            font-size: 14px;
-            outline: none;
-            transition: all 0.2s;
-        }
-        input:focus, select:focus {
-            border-color: #3b82f6;
-            background: #ffffff;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        button { 
-            background: #0f172a; 
-            color: #ffffff; 
-            border: none; 
-            padding: 12px 24px; 
-            border-radius: 12px;
-            cursor: pointer; 
-            font-family: inherit; 
-            font-weight: 600; 
-            font-size: 14px;
-            transition: all 0.2s;
+        .container {
             width: 100%;
+            max-width: 1000px;
         }
-        button:hover { 
-            background: #1e293b; 
-            transform: translateY(-1px);
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
         }
-        .treadmill { 
-            margin-top: 28px; 
-            padding: 20px; 
-            background: #fff1f2;
-            border-radius: 16px;
-            border: 1px solid #ffe4e6; 
-            text-align: center; 
+        h1, h2, h3 {
+            margin: 0;
+            color: var(--accent-color);
         }
-        .treadmill h3 { font-size: 14px; color: #9f1239; margin: 0 0 12px 0; font-weight: 600; }
-        .treadmill span { color: #e11d48; font-weight: 700; }
-        .treadmill button { background: #ffffff; color: #e11d48; border: 1px solid #fecdd3; }
-        .treadmill button:hover { background: #e11d48; color: #ffffff; border-color: #e11d48; }
-        .nav-btn {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            color: #64748b;
-            padding: 6px 12px;
-            width: auto;
+        button {
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .btn-danger {
+            background-color: #cf6679;
+        }
+        #auth-status {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        @media (min-width: 768px) {
+            .dashboard {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-        .nav-btn:hover { background: #f8fafc; color: #0f172a; }
-        #status { color: #d97706; margin-bottom: 20px; font-size: 13px; font-weight: 500; }
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+        .weekday {
+            font-weight: bold;
+            color: var(--text-muted);
+            padding: 5px 0;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        .day {
+            background-color: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            position: relative;
+            font-size: 0.9rem;
+        }
+        .day:hover {
+            background-color: rgba(187, 134, 252, 0.1);
+        }
+        .day.today {
+            border: 2px solid var(--accent-color);
+        }
+        .day.selected {
+            background-color: rgba(187, 134, 252, 0.2);
+        }
+        .day.has-training {
+            background-color: rgba(3, 218, 198, 0.15);
+            border-color: #03dac6;
+        }
+        .day-number {
+            align-self: flex-start;
+        }
+        .day-indicator {
+            width: 8px;
+            height: 8px;
+            background-color: #03dac6;
+            border-radius: 50%;
+            align-self: flex-end;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            background-color: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            height: 80px;
+        }
+        .training-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .training-item {
+            background-color: rgba(255,255,255,0.05);
+            border-left: 3px solid #03dac6;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 0 4px 4px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .training-info h4 {
+            margin: 0 0 5px 0;
+            color: #03dac6;
+        }
+        .training-info p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .stat-box {
+            background-color: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-top: 5px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 60vh;
+        }
+        #login-screen p {
+            margin-bottom: 20px;
+            color: var(--text-muted);
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Podsumowanie aktywności</h1>
-    <div id="status">Inicjalizacja usług chmurowych...</div>
-    <div id="auth-section" style="display:none; text-align:center;">
-        <button id="login-btn">Zaloguj się przez Google</button>
+    <header>
+        <div>
+            <h1>Kalendarz Treningowy</h1>
+            <span id="auth-status">Inicjalizacja...</span>
+        </div>
+        <div>
+            <button id="btn-login" class="hidden">Zaloguj przez Google</button>
+            <button id="btn-logout" class="hidden btn-danger">Wyloguj</button>
+        </div>
+    </header>
+
+    <div id="login-screen">
+        <p>Zaloguj się swoim kontem Google, aby zarządzać treningami zapisanymi na Twoim Dysku Google.</p>
+        <button id="btn-login-central">Zaloguj się</button>
     </div>
-    
-    <div id="app-content" style="display:none;">
-        <div style="font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 4px;" id="user-welcome"></div>
-        <div class="calendar-header">
-            <button class="nav-btn" onclick="changeMonth(-1)">◀</button>
-            <h3 id="month-title"></h3>
-            <button class="nav-btn" onclick="changeMonth(1)">▶</button>
-        </div>
-        
-        <div id="calendar-grid" class="grid"></div>
 
-        <div class="treadmill">
-            <h3>Stan bieżni: Serwis wymagany za <span><span id="hours-left">30h 00m</span></span></h3>
-            <button onclick="resetTreadmill()">Potwierdź smarowanie (Reset)</button>
-        </div>
-
-        <div id="training-form">
-            <h3 id="form-title" style="font-size: 16px; color: #0f172a; margin-bottom: 12px;">Dodaj nową aktywność</h3>
-            <div id="form-inputs">
-                <select id="t-type" onchange="toggleFields()">
-                    <option value="Kardio">Kardio</option>
-                    <option value="Siła">Trening siłowy</option>
-                </select>
-                <div id="cardio-fields">
-                    <select id="c-sub"><option value="Marsz">Marsz</option><option value="Bieg">Bieg</option><option value="Rower">Rower</option></select>
-                    <select id="c-place"><option value="Stacjonarny">Stacjonarny (Bieżnia)</option><option value="W terenie">W terenie</option></select>
-                    <input type="number" step="0.1" id="c-dist" placeholder="Dystans (km)">
-                    <input type="number" step="1" id="c-time" placeholder="Czas trwania (minuty)">
-                </div>
-                <button id="save-btn" onclick="saveTraining()">Zatwierdź i zapisz</button>
+    <div id="main-content" class="hidden dashboard">
+        <div class="card">
+            <div class="calendar-controls">
+                <button id="btn-prev">&lt;</button>
+                <h2 id="calendar-month-year">Miesiąc Rok</h2>
+                <button id="btn-next">&gt;</button>
             </div>
-            <button style="background:none; color:#94a3b8; margin-top: 8px; padding: 6px; font-weight: 500;" onclick="document.getElementById('training-form').style.display='none'">Anuluj</button>
+            <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+
+        <div class="flex-column" style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="card">
+                <h3 id="editor-title">Treningi w dniu: </h3>
+                <p id="selected-date-str" style="color: var(--text-muted); margin: 5px 0 15px 0; font-size: 0.9rem;"></p>
+                
+                <div class="training-list" id="day-trainings-list"></div>
+
+                <hr style="border-color: var(--border-color); margin: 15px 0;">
+                
+                <h4>Dodaj nowy trening</h4>
+                <form id="training-form" style="margin-top: 10px;">
+                    <div class="form-group">
+                        <label for="input-type">Rodzaj aktywności</label>
+                        <select id="input-type" required>
+                            <option value="Bieganie (Bieżnia)">Bieganie (Bieżnia)</option>
+                            <option value="Bieganie (Teren)">Bieganie (Teren)</option>
+                            <option value="Rower">Rower</option>
+                            <option value="Siłownia">Siłownia</option>
+                            <option value="Inny">Inny</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-duration">Czas trwania (minuty)</label>
+                        <input type="number" id="input-duration" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-notes">Notatki / Opis</label>
+                        <textarea id="input-notes" placeholder="np. dystans, samopoczucie..."></textarea>
+                    </div>
+                    <button type="submit" style="width: 100%;">Zatwierdź i zapisz</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Statystyki ogólne</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div>Wszystkie treningi</div>
+                        <div class="stat-value" id="stat-total-count">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div>Czas łącznie</div>
+                        <div class="stat-value" id="stat-total-time">0h</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px;">Stan Oleju w Bieżni</h3>
+                <div class="stats-grid">
+                    <div class="stat-box" style="grid-column: span 2;">
+                        <div>Czas pracy od smarowania</div>
+                        <div class="stat-value" id="treadmill-hours">0 / 30 h</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;" id="treadmill-status">Sprawdzanie...</div>
+                        <button id="btn-reset-treadmill" style="margin-top: 10px; font-size: 0.8rem; padding: 5px 10px;" class="btn-danger">Resetuj licznik oleju</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<script src="https://apis.google.com/js/api.js"></script>
-<script src="https://accounts.google.com/gsi/client"></script>
+<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 
 <script>
     const CLIENT_ID = '289938219200-sruc345qf7pqk4k7t8h011iua0cjncmq.apps.googleusercontent.com';
-    
-    // Wklejone identyfikatory Twoich nowych plików .json z Dysku Google
+    const API_KEY = 'AIzaSyA-XeXLNwgulaqjhydaqdcoVUqo0_VJzzM';
+    const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+
     const dbFileId = '1mack9QLkzU8l0RKR4COtWfHN9ntA782O';
     const treadmillFileId = '1jRvd-wddUaouwq1jV2NgZ-CAdr7gmjP2';
-    
+
+    let gapiInited = false;
+    let gisInited = false;
     let tokenClient;
-    let currentDate = new Date();
-    let userEmail = "";
-    let userName = "";
     
-    let treningiBaza = [];
-    let treadmillHours = 30;
-    let wybranegoDniaDataString = "";
+    let currentDate = new Date();
+    let selectedDate = new Date();
+    
+    let trainingsDatabase = [];
+    let treadmillData = { hours: 0 };
 
-    window.onload = function () {
-        gapi.load('client', async () => {
-            try {
-                document.getElementById('status').innerText = "Oczekiwanie na autoryzację profilu...";
-                document.getElementById('auth-section').style.display = 'block';
-                await gapi.client.init({});
-            } catch (e) {
-                document.getElementById('status').innerText = "Błąd inicjalizacji gapi: " + (e.message || JSON.stringify(e));
-            }
-        });
+    const weekdays = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'];
+    const months = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
 
+    function gapiLoaded() { gapi.load('client', initializeGapiClient); }
+    async function initializeGapiClient() {
+        await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
+        gapiInited = true;
+        maybeEnableButtons();
+    }
+    function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: CLIENT_ID,
-            scope: 'https://www.googleapis.com/auth/drive openid email profile',
-            callback: async (resp) => {
-                if (resp.error) {
-                    document.getElementById('status').innerText = "Błąd OAuth: " + resp.error;
-                    return;
-                }
-                try {
-                    document.getElementById('auth-section').style.display = 'none';
-                    document.getElementById('status').innerText = "Wczytywanie bazy danych z chmury...";
-                    document.getElementById('status').style.display = 'block';
-                    await gapi.client.load('drive', 'v3');
-                    await fetchUserInfo();
-                    await loadDatabaseData();
-                    document.getElementById('app-content').style.display = 'block';
-                    document.getElementById('status').style.display = 'none';
-                    renderCalendar();
-                } catch (e) {
-                    document.getElementById('status').innerText = "Wystąpił błąd chmury: " + (e.message || JSON.stringify(e));
-                    console.error(e);
-                }
-            },
+            scope: SCOPES,
+            callback: '',
         });
-        document.getElementById('login-btn').onclick = () => tokenClient.requestAccessToken({prompt: 'consent'});
-    };
+        gisInited = true;
+        maybeEnableButtons();
+    }
+    function maybeEnableButtons() {
+        if (gapiInited && gisInited) {
+            document.getElementById('btn-login').classList.remove('hidden');
+            document.getElementById('btn-login-central').classList.remove('hidden');
+            checkExistingAuth();
+        }
+    }
 
-    async function fetchUserInfo() {
-        const resp = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-            headers: { 'Authorization': `Bearer ${gapi.client.getToken().access_token}` }
-        });
-        const info = await resp.json();
-        if (!info.email) throw new Error("Nie udało się pobrać adresu e-mail.");
+    function checkExistingAuth() {
+        const token = localStorage.getItem('gapi_token');
+        if (token) {
+            gapi.client.setToken({ access_token: token });
+            showAppContent();
+        }
+    }
+
+    function handleAuthClick() {
+        tokenClient.callback = async (resp) => {
+            if (resp.error !== undefined) { throw (resp); }
+            localStorage.setItem('gapi_token', gapi.client.getToken().access_token);
+            showAppContent();
+        };
+        if (gapi.client.getToken() === null) {
+            tokenClient.requestAccessToken({ prompt: 'consent' });
+        } else {
+            tokenClient.requestAccessToken({ prompt: '' });
+        }
+    }
+
+    function handleSignoutClick() {
+        gapi.client.setToken(null);
+        localStorage.removeItem('gapi_token');
+        location.reload();
+    }
+
+    async function showAppContent() {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+        document.getElementById('btn-login').classList.add('hidden');
+        document.getElementById('btn-logout').classList.remove('hidden');
+        document.getElementById('auth-status').innerText = "Zalogowano pomyślnie";
         
-        userEmail = info.email.toLowerCase().trim();
-        userName = userEmail === 'bercyk23@gmail.com' ? 'Michał' : (userEmail === 'klaudia.gurska@gmail.com' ? 'Klaudia' : 'Gość');
-        document.getElementById('user-welcome').innerText = `Zalogowany profil: ${userName}`;
-    }
-
-    function formatTreadmillTime(hoursDecimal) {
-        if (hoursDecimal <= 0) return "0h 00m";
-        const totalMinutes = Math.round(hoursDecimal * 60);
-        const h = Math.floor(totalMinutes / 60);
-        const m = totalMinutes % 60;
-        return `${h}h ${String(m).padStart(2, '0')}m`;
-    }
-
-    async function loadDatabaseData() {
-        try {
-            const resDb = await gapi.client.drive.files.get({ fileId: dbFileId, alt: 'media' });
-            treningiBaza = typeof resDb.body === 'string' ? JSON.parse(resDb.body) : resDb.result;
-        } catch(e) {
-            treningiBaza = [];
-        }
-
-        try {
-            const resTm = await gapi.client.drive.files.get({ fileId: treadmillFileId, alt: 'media' });
-            const tmData = typeof resTm.body === 'string' ? JSON.parse(resTm.body) : resTm.result;
-            treadmillHours = tmData.hours ?? 30;
-        } catch(e) {
-            treadmillHours = 30;
-        }
-
-        if (!Array.isArray(treningiBaza)) treningiBaza = [];
-        document.getElementById('hours-left').innerText = formatTreadmillTime(treadmillHours);
+        await loadDataFromDrive();
+        renderCalendar();
+        renderStats();
     }
 
     async function updateDriveFile(fileId, content) {
         try {
-            await gapi.client.drive.files.update({ fileId: fileId, media: { mimeType: 'application/json', body: JSON.stringify(content) } });
+            const token = gapi.client.getToken().access_token;
+            const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(content)
+            });
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Status: ${response.status}, ${errText}`);
+            }
         } catch(e) {
-            alert("Błąd zapisu pliku: " + JSON.stringify(e));
+            alert("Błąd zapisu pliku na Dysku Google: " + e.message);
+        }
+    }
+
+    async function loadDataFromDrive() {
+        try {
+            const dbResp = await gapi.client.drive.files.get({ fileId: dbFileId, alt: 'media' });
+            trainingsDatabase = dbResp.result || [];
+        } catch (e) {
+            console.error(e);
+            trainingsDatabase = [];
+        }
+
+        try {
+            const treadResp = await gapi.client.drive.files.get({ fileId: treadmillFileId, alt: 'media' });
+            treadmillData = treadResp.result || { hours: 0 };
+        } catch (e) {
+            console.error(e);
+            treadmillData = { hours: 0 };
         }
     }
 
     function renderCalendar() {
         const grid = document.getElementById('calendar-grid');
-        grid.innerHTML = "";
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
+        grid.innerHTML = '';
         
-        document.getElementById('month-title').innerText = currentDate.toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' });
+        document.getElementById('calendar-month-year').innerText = `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
         
-        const firstDayIndex = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const blankDays = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+        weekdays.forEach(day => {
+            const div = document.createElement('div');
+            div.className = 'weekday';
+            div.innerText = day;
+            grid.appendChild(div);
+        });
 
-        for (let i = 0; i < blankDays; i++) grid.appendChild(document.createElement('div'));
+        const firstDayIndex = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+        const adjFirstDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+        const totalDays = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
 
-        for(let i=1; i<=daysInMonth; i++) {
-            let div = document.createElement('div');
-            div.className = 'day'; 
-            div.innerHTML = `<span style="font-weight:600; color:#1e293b;">${i}</span>`;
+        for (let i = 0; i < adjFirstDay; i++) {
+            grid.appendChild(document.createElement('div'));
+        }
+
+        for (let d = 1; d <= totalDays; d++) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'day';
             
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-            const dnioweTreningi = Array.isArray(treningiBaza) ? treningiBaza.filter(t => t.date === dateStr) : [];
+            const thisDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), d);
+            const dateStr = formatDateLocal(thisDate);
             
-            dnioweTreningi.forEach(t => {
-                let badge = document.createElement('span');
-                badge.className = `badge ${t.user === 'Michał' ? 'badge-michal' : 'badge-klaudia'}`;
-                badge.innerText = `${t.user[0]}: ${t.type === 'Kardio' ? t.subType : 'Siła'}`;
-                div.appendChild(badge);
+            if (dateStr === formatDateLocal(new Date())) dayDiv.classList.add('today');
+            if (dateStr === formatDateLocal(selectedDate)) dayDiv.classList.add('selected');
+            
+            const hasTraining = trainingsDatabase.some(t => t.date === dateStr);
+            if (hasTraining) dayDiv.classList.add('has-training');
+
+            dayDiv.innerHTML = `<span class="day-number">${d}</span>`;
+            if (hasTraining) dayDiv.innerHTML += `<span class="day-indicator"></span>`;
+
+            dayDiv.addEventListener('click', () => {
+                selectedDate = thisDate;
+                document.querySelectorAll('.day').forEach(el => el.classList.remove('selected'));
+                dayDiv.classList.add('selected');
+                updateEditorPanel();
             });
 
-            div.onclick = () => openDay(dateStr, dnioweTreningi);
-            grid.appendChild(div);
+            grid.appendChild(dayDiv);
+        }
+        updateEditorPanel();
+    }
+
+    function formatDateLocal(date) {
+        return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    }
+
+    function updateEditorPanel() {
+        const dateStr = formatDateLocal(selectedDate);
+        document.getElementById('selected-date-str').innerText = selectedDate.toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        
+        const listContainer = document.getElementById('day-trainings-list');
+        listContainer.innerHTML = '';
+        
+        const daysTrainings = trainingsDatabase.filter(t => t.date === dateStr);
+        
+        if (daysTrainings.length === 0) {
+            listContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem; margin:0;">Brak zaplanowanych lub wykonanych treningów.</p>';
+        } else {
+            daysTrainings.forEach(t => {
+                const item = document.createElement('div');
+                item.className = 'training-item';
+                item.innerHTML = `
+                    <div class="training-info">
+                        <h4>${t.type}</h4>
+                        <p>Czas: <strong>${t.duration} min</strong></p>
+                        ${t.notes ? `<p style="font-style:italic; font-size:0.8rem; margin-top:3px;">${t.notes}</p>` : ''}
+                    </div>
+                    <button class="btn-danger" style="padding: 5px 8px; font-size: 0.8rem;" onclick="deleteTraining('${t.id}')">Usuń</button>
+                `;
+                listContainer.appendChild(item);
+            });
         }
     }
 
-    function openDay(dateStr, treningi) {
-        wybranegoDniaDataString = dateStr;
-        document.getElementById('form-title').innerText = `Dzień: ${dateStr}`;
-        document.getElementById('training-form').style.display = 'block';
+    document.getElementById('training-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        const tMoje = treningi.find(t => t.user === userName);
-        const tInne = treningi.find(t => t.user !== userName);
-        
-        let htmlExtra = "";
-        if (tInne) {
-            htmlExtra += `<div style="background:#f8fafc; padding:12px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:14px; font-size:13px; color:#334155;">
-                <strong style="color:#6b21a8;">Trening (${tInne.user}):</strong><br>
-                Typ: ${tInne.type} ${tInne.subType ? '('+tInne.subType+', '+tInne.place+')' : ''}<br>
-                ${tInne.type === 'Kardio' ? `Dystans: ${tInne.distance}km | Czas: ${tInne.time} min` : ''}
-            </div>`;
+        const type = document.getElementById('input-type').value;
+        const duration = parseInt(document.getElementById('input-duration').value);
+        const notes = document.getElementById('input-notes').value;
+        const dateStr = formatDateLocal(selectedDate);
+
+        const newTraining = { id: Date.now().toString(), date: dateStr, type, duration, notes };
+        trainingsDatabase.push(newTraining);
+
+        if (type === "Bieganie (Bieżnia)") {
+            treadmillData.hours = parseFloat((treadmillData.hours + (duration / 60)).toFixed(2));
+            await updateDriveFile(treadmillFileId, treadmillData);
         }
 
-        document.getElementById('form-inputs').innerHTML = htmlExtra + `
-            <select id="t-type" onchange="toggleFields()">
-                <option value="Kardio">Kardio</option>
-                <option value="Siła">Trening siłowy</option>
-            </select>
-            <div id="cardio-fields">
-                <select id="c-sub"><option value="Marsz">Marsz</option><option value="Bieg">Bieg</option><option value="Rower">Rower</option></select>
-                <select id="c-place"><option value="Stacjonarny">Stacjonarny (Bieżnia)</option><option value="W terenie">W terenie</option></select>
-                <input type="number" step="0.1" id="c-dist" placeholder="Dystans (km)">
-                <input type="number" step="1" id="c-time" placeholder="Czas trwania (minuty)">
-            </div>
-            <button id="save-btn" onclick="saveTraining()">${tMoje ? 'Zaktualizuj swój trening' : 'Zapisz aktywność'}</button>
-        `;
-
-        if (tMoje) {
-            document.getElementById('t-type').value = tMoje.type;
-            if (tMoje.type === 'Kardio') {
-                document.getElementById('c-sub').value = tMoje.subType || 'Marsz';
-                document.getElementById('c-place').value = tMoje.place || 'W terenie';
-                document.getElementById('c-dist').value = tMoje.distance || '';
-                document.getElementById('c-time').value = tMoje.time || '';
-            }
-        }
-        toggleFields();
-    }
-
-    async function saveTraining() {
-        const type = document.getElementById('t-type').value;
-        if(!Array.isArray(treningiBaza)) treningiBaza = [];
-
-        const staryTreningIndex = treningiBaza.findIndex(t => t.date === wybranegoDniaDataString && t.user === userName);
-        if (staryTreningIndex !== -1) {
-            const stary = treningiBaza[staryTreningIndex];
-            if (stary.type === 'Kardio' && stary.place === 'Stacjonarny' && (stary.subType === 'Bieg' || stary.subType === 'Marsz')) {
-                treadmillHours = treadmillHours + (parseFloat(stary.time) / 60);
-            }
-            treningiBaza.splice(staryTreningIndex, 1);
-        }
-
-        let nowyTrening = { date: wybranegoDniaDataString, user: userName, type: type };
-
-        if (type === 'Kardio') {
-            const sub = document.getElementById('c-sub').value;
-            const place = document.getElementById('c-place').value;
-            const dist = parseFloat(document.getElementById('c-dist').value) || 0;
-            const timeInMinutes = parseFloat(document.getElementById('c-time').value) || 0;
-            const timeInHours = timeInMinutes / 60;
-            
-            nowyTrening.subType = sub;
-            nowyTrening.place = place;
-            nowyTrening.distance = dist;
-            nowyTrening.time = timeInMinutes;
-            nowyTrening.speed = timeInHours > 0 ? (dist / timeInHours).toFixed(1) : 0;
-
-            if (place === 'Stacjonarny' && (sub === 'Bieg' || sub === 'Marsz')) {
-                treadmillHours = Math.max(0, treadmillHours - timeInHours);
-            }
-        }
-
-        treningiBaza.push(nowyTrening);
-        document.getElementById('status').innerText = "Zapisywanie w chmurze...";
-        document.getElementById('status').style.display = 'block';
+        await updateDriveFile(dbFileId, trainingsDatabase);
         
-        await updateDriveFile(dbFileId, treningiBaza);
-        await updateDriveFile(treadmillFileId, { hours: treadmillHours });
+        document.getElementById('input-duration').value = '';
+        document.getElementById('input-notes').value = '';
         
-        document.getElementById('hours-left').innerText = formatTreadmillTime(treadmillHours);
-        document.getElementById('status').style.display = 'none';
-        document.getElementById('training-form').style.display = 'none';
         renderCalendar();
+        renderStats();
+    });
+
+    async function deleteTraining(id) {
+        if(!confirm("Czy na pewno chcesz usunąć ten trening?")) return;
+        const idx = trainingsDatabase.findIndex(t => t.id === id);
+        if (idx !== -1) {
+            const t = trainingsDatabase[idx];
+            if (t.type === "Bieganie (Bieżnia)") {
+                treadmillData.hours = parseFloat(Math.max(0, treadmillData.hours - (t.duration / 60)).toFixed(2));
+                await updateDriveFile(treadmillFileId, treadmillData);
+            }
+            trainingsDatabase.splice(idx, 1);
+            await updateDriveFile(dbFileId, trainingsDatabase);
+            renderCalendar();
+            renderStats();
+        }
     }
 
-    async function resetTreadmill() {
-        treadmillHours = 30;
-        document.getElementById('hours-left').innerText = "30h 00m";
-        await updateDriveFile(treadmillFileId, { hours: 30 });
-        alert("Zresetowano licznik bieżni.");
+    document.getElementById('btn-reset-treadmill').addEventListener('click', async () => {
+        if (confirm("Czy na pewno przesmarowałeś pas i chcesz zresetować licznik do 0 godzin?")) {
+            treadmillData.hours = 0;
+            await updateDriveFile(treadmillFileId, treadmillData);
+            renderStats();
+        }
+    });
+
+    function renderStats() {
+        document.getElementById('stat-total-count').innerText = trainingsDatabase.length;
+        const totalMinutes = trainingsDatabase.reduce((sum, t) => sum + t.duration, 0);
+        document.getElementById('stat-total-time').innerText = `${Math.round(totalMinutes / 60)}h`;
+
+        const curHours = treadmillData.hours || 0;
+        document.getElementById('treadmill-hours').innerText = `${curHours} / 30 h`;
+        
+        const statusEl = document.getElementById('treadmill-status');
+        if (curHours >= 30) {
+            statusEl.innerText = "⚠️ WYMAGANE SMAROWANIE PASA BIEŻNI!";
+            statusEl.style.color = "#cf6679";
+        } else if (curHours >= 25) {
+            statusEl.innerText = "Niedługo należy przesmarować pas.";
+            statusEl.style.color = "#ffb74d";
+        } else {
+            statusEl.innerText = "Stan oleju/smaru jest odpowiedni.";
+            statusEl.style.color = "#03dac6";
+        }
     }
 
-    function changeMonth(direction) {
-        currentDate.setMonth(currentDate.getMonth() + direction);
-        renderCalendar();
-    }
+    document.getElementById('btn-prev').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
+    document.getElementById('btn-next').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
 
-    function toggleFields() {
-        document.getElementById('cardio-fields').style.display = 
-            document.getElementById('t-type').value === 'Kardio' ? 'block' : 'none';
-    }
+    document.getElementById('btn-login').addEventListener('click', handleAuthClick);
+    document.getElementById('btn-login-central').addEventListener('click', handleAuthClick);
+    document.getElementById('btn-logout').addEventListener('click', handleSignoutClick);
 </script>
 </body>
 </html>
